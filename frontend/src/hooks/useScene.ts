@@ -43,6 +43,17 @@ export default function useScene() {
       panY: 0
     };
 
+    const profileSwoop = {
+      startX: 0,
+      startY: 720,
+      startZ: 1430,
+      endX: -300,
+      endY: 560,
+      endZ: 1080
+    };
+
+    const profileMotionStart = 0.99;
+
     const vertexShader = `
     uniform float iTime;
     uniform float heightScale;
@@ -142,7 +153,7 @@ export default function useScene() {
 
       vec3 pos = position;
       vec2 samplePos = pos.xy + vec2(panX, panY);
-      float lateralEase = 1.0 - clamp(scrollProgress * 2.0, 0.0, 1.0);
+      float lateralEase = 1.0;
       float driftX = sin(iTime * 0.5) * 0.5 * lateralEase;
       float driftY = cos(iTime * 0.4) * 0.5 * lateralEase;
 
@@ -191,14 +202,14 @@ export default function useScene() {
       if (visualiseText) visualiseText.style.opacity = Math.max(0, Math.min(1, smoothstep(0.65, 0.72, p) * (1 - smoothstep(0.92, 0.98, p)))).toString();
 
       if (nodesContainer) {
-        // Reveal nodes ONLY once the "But now it does" text appears (0.70-0.80)
-        const nodeOpacity = smoothstep(0.70, 0.85, p);
+        // Reveal visualise nodes in the same fade-in window as the visualise text.
+        const nodeOpacity = smoothstep(0.65, 0.72, p);
         nodesContainer.style.opacity = nodeOpacity.toString();
       }
 
       if (profileText) {
         // Profile section: "It all starts with you"
-        const profileIn = smoothstep(1.00, 1.10, p);
+        const profileIn = smoothstep(profileMotionStart, 1.08, p);
         const profileOut = 1 - smoothstep(1.25, 1.32, p);
         profileText.style.opacity = Math.max(0, Math.min(1, profileIn * profileOut)).toString();
       }
@@ -216,7 +227,7 @@ export default function useScene() {
 
       const inboxSection = document.getElementById('inbox-section');
       if (inboxSection) {
-        const inboxIn = smoothstep(1.40, 1.48, p);
+        const inboxIn = smoothstep(1.48, 1.50, p);
         inboxSection.style.opacity = Math.max(0, Math.min(1, inboxIn)).toFixed(4);
         inboxSection.style.transform = `translateY(${(1 - inboxIn) * 30}px)`;
       }
@@ -236,7 +247,8 @@ export default function useScene() {
       const p = clamp01(scrollProgress / 1.5); // Normalize to 0-1 for mask logic
 
       const slideProgress = smoothstep(0.15, 0.30, p);
-      const maskCenter = 20 + 60 * slideProgress;
+      const leftMaskCenter = 20 - 45 * slideProgress;
+      const rightMaskCenter = 120 - 45 * slideProgress;
       // Fade out slide mask for Visualize
       const slideOpacity = (1.0 - smoothstep(0.40, 0.50, p)) * (1.0 - smoothstep(0.85, 1.0, p));
 
@@ -246,14 +258,14 @@ export default function useScene() {
       const blackout = smoothstep(0.86, 0.92, p);
       const ellipseMask = Math.max(0, visualiseIn * (1 - blackout));
 
-      sectionMask.style.setProperty('--mask-center', `${maskCenter.toFixed(2)}%`);
+      sectionMask.style.setProperty('--left-mask-center', `${leftMaskCenter.toFixed(2)}%`);
+      sectionMask.style.setProperty('--right-mask-center', `${rightMaskCenter.toFixed(2)}%`);
       sectionMask.style.setProperty('--slide-opacity', Math.max(0, slideOpacity).toFixed(4));
       sectionMask.style.setProperty('--ellipse-mask', ellipseMask.toFixed(4));
       sectionMask.style.setProperty('--blackout', blackout.toFixed(4));
     }
 
     function updateNodeStageState() {
-      const reveal = smoothstep(1.05, 1.18, scrollProgress);
       const hideOthers = smoothstep(1.05, 1.15, scrollProgress);
       const workflowTakeover = smoothstep(1.28, 1.38, scrollProgress);
 
@@ -261,27 +273,50 @@ export default function useScene() {
       if (nodeMarcus) nodeMarcus.style.opacity = ((1 - hideOthers) * (1 - workflowTakeover)).toFixed(4);
 
       if (nodeDavid) {
-        const startLeft = 45;
-        const endLeft = 60; // Positioned slightly to the right for Profile focus
-        const startTop = 46;
-        const endTop = 50;
-        const nextLeft = startLeft + (endLeft - startLeft) * reveal;
-        const nextTop = startTop + (endTop - startTop) * reveal;
-        nodeDavid.style.left = `${nextLeft.toFixed(3)}%`;
-        nodeDavid.style.top = `${nextTop.toFixed(3)}%`;
+        const reveal = smoothstep(profileMotionStart, 1.18, scrollProgress);
 
-        // Scale David up faster during the focus
-        const profileFocus = smoothstep(1.05, 1.18, scrollProgress);
-        const profileScale = 1.0 + profileFocus * 0.8;
-        nodeDavid.style.transform = `translate(-50%, -50%) scale(${profileScale})`;
+        // Keep David and camera motion coupled with a single diagonal progress curve.
+        const xMotion = clamp01((sceneState.cameraX - profileSwoop.startX) / (profileSwoop.endX - profileSwoop.startX));
+        const compensatedLeft = 45 + xMotion * 30.0;
+        // Downward and sideways movement happen simultaneously for a clean diagonal.
+        const compensatedTop = 46 + xMotion * 1.8;
+        nodeDavid.style.left = `${compensatedLeft.toFixed(3)}%`;
+        nodeDavid.style.top = `${compensatedTop.toFixed(3)}%`;
+
+        nodeDavid.style.transform = `translate(-50%, -50%) scale(1)`;
         nodeDavid.style.opacity = (1 - workflowTakeover).toFixed(4);
-        nodeDavid.setAttribute('data-large', reveal > 0.01 ? 'true' : 'false');
+        nodeDavid.setAttribute('data-large', reveal > 0 ? 'true' : 'false');
       }
     }
 
     function updateWorkflowState() {
       const workflowSection = document.getElementById('workflow-section');
       if (!workflowSection) return;
+
+      const viewportWidth = window.innerWidth;
+      const isPhone = viewportWidth < 640;
+      const isCompact = viewportWidth < 1140;
+      const layout = {
+        // Compact mode (<1140px) uses a vertical flow with a horizontal bottom row.
+        davidTop: isCompact ? (isPhone ? 33 : 35) : 66,
+        davidLeft: isCompact ? 50 : 19.5,
+        statsTop: isCompact ? (isPhone ? 52 : 55) : 66,
+        statsLeft: 50,
+        sarahStartTop: isCompact ? (isPhone ? 78 : 76) : 42,
+        elenaStartTop: isCompact ? (isPhone ? 78 : 76) : 66,
+        michaelStartTop: isCompact ? (isPhone ? 78 : 76) : 90,
+        sarahStartLeft: isCompact ? (isPhone ? 21 : 24) : 85,
+        elenaStartLeft: 50,
+        michaelStartLeft: isCompact ? (isPhone ? 79 : 76) : 85,
+        sarahEndTop: isCompact ? (isPhone ? 37 : 35) : 32,
+        elenaEndTop: isCompact ? (isPhone ? 46 : 44) : 42,
+        michaelEndTop: isCompact ? (isPhone ? 55 : 53) : 52,
+        sarahArcLift: isCompact ? (isPhone ? 10 : 12) : 20,
+        elenaArcLift: isCompact ? (isPhone ? 8 : 10) : 15,
+        michaelArcLift: isCompact ? (isPhone ? 6 : 8) : 10,
+        inboxTargetLeft: 50,
+        scaleGain: isCompact ? (isPhone ? 0.08 : 0.10) : 0.15
+      };
 
       const p = Math.min(1.5, Math.max(0, scrollProgress));
       const sectionIn = smoothstep(1.30, 1.38, scrollProgress);
@@ -306,7 +341,7 @@ export default function useScene() {
 
 
       // Fade out specific workflow background elements during inbox transition
-      const outP = smoothstep(1.40, 1.48, scrollProgress);
+      const outP = smoothstep(1.48, 1.50, scrollProgress);
       const bgOpacity = (1.0 - outP).toFixed(4);
 
       const grid = document.getElementById('wf-bg-grid');
@@ -326,64 +361,93 @@ export default function useScene() {
       // Fade in the physical inbox tray as we transition
       const tray = document.getElementById('physical-inbox');
       if (tray) {
-        const trayIn = smoothstep(1.40, 1.48, scrollProgress);
+        const trayIn = smoothstep(1.48, 1.50, scrollProgress);
         tray.style.opacity = trayIn.toFixed(4);
       }
 
       if (lines) {
         // Fade lines out during the INBOX transition (1.42 onwards)
-        const linesOut = smoothstep(1.42, 1.48, scrollProgress);
+        const linesOut = smoothstep(1.44, 1.47, scrollProgress);
         lines.style.opacity = (1.0 - linesOut).toFixed(4);
       }
 
       // Handle the nodes (David and Stats image fade out during inbox transition)
       const davidNode = document.getElementById('wf-node-david');
       const statsNode = document.getElementById('wf-node-stats');
+      if (davidNode) {
+        davidNode.style.top = `${layout.davidTop}%`;
+        davidNode.style.left = `${layout.davidLeft}%`;
+      }
+      if (statsNode) {
+        statsNode.style.top = `${layout.statsTop}%`;
+        statsNode.style.left = `${layout.statsLeft}%`;
+      }
       if (davidNode && scrollProgress > 1.02) davidNode.style.opacity = bgOpacity;
       if (statsNode && scrollProgress > 1.02) statsNode.style.opacity = bgOpacity;
 
-      const pInbox = smoothstep(1.42, 1.50, scrollProgress);
+      const inboxMotionStart = 1.48;
+      const inboxMotionEnd = 1.50;
+      const pInbox = smoothstep(inboxMotionStart, inboxMotionEnd, scrollProgress);
 
       // Animate the 3 cards across arc 
       const sarah = document.getElementById('wf-node-sarah');
       const michael = document.getElementById('wf-node-michael');
       const elena = document.getElementById('wf-node-elena');
 
-      // Common arc function for left-x
-      const arcLeft = 85 - (35 * pInbox);
-      const targetScale = 1.0 + (0.15 * pInbox);
+      const targetScale = 1.0 + (layout.scaleGain * pInbox);
 
-      if (michael && scrollProgress > 1.35) {
-        const startTop = 96; // Michael at 96%
-        const endTop = 52;
-        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 10;
+      if (michael && scrollProgress > inboxMotionStart) {
+        const startTop = layout.michaelStartTop;
+        const endTop = layout.michaelEndTop;
+        const startLeft = layout.michaelStartLeft;
+        const endLeft = layout.inboxTargetLeft;
+        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * layout.michaelArcLift;
+        const arcLeft = startLeft + (endLeft - startLeft) * pInbox;
         michael.style.top = `${arcTop}%`;
         michael.style.left = `${arcLeft}%`;
         michael.style.transform = `translate(-50%, -50%) scale(${targetScale})`;
         michael.style.zIndex = "32";
         michael.style.opacity = "1";
+      } else if (michael) {
+        michael.style.top = `${layout.michaelStartTop}%`;
+        michael.style.left = `${layout.michaelStartLeft}%`;
+        michael.style.zIndex = "30";
       }
 
-      if (elena && scrollProgress > 1.35) {
-        const startTop = 72; // Elena at 72%
-        const endTop = 42;
-        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 15;
+      if (elena && scrollProgress > inboxMotionStart) {
+        const startTop = layout.elenaStartTop;
+        const endTop = layout.elenaEndTop;
+        const startLeft = layout.elenaStartLeft;
+        const endLeft = layout.inboxTargetLeft;
+        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * layout.elenaArcLift;
+        const arcLeft = startLeft + (endLeft - startLeft) * pInbox;
         elena.style.top = `${arcTop}%`;
         elena.style.left = `${arcLeft}%`;
         elena.style.transform = `translate(-50%, -50%) scale(${targetScale})`;
         elena.style.zIndex = "31";
         elena.style.opacity = "1";
+      } else if (elena) {
+        elena.style.top = `${layout.elenaStartTop}%`;
+        elena.style.left = `${layout.elenaStartLeft}%`;
+        elena.style.zIndex = "30";
       }
 
-      if (sarah && scrollProgress > 1.35) {
-        const startTop = 48; // Sarah at 48%
-        const endTop = 32;
-        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 20;
+      if (sarah && scrollProgress > inboxMotionStart) {
+        const startTop = layout.sarahStartTop;
+        const endTop = layout.sarahEndTop;
+        const startLeft = layout.sarahStartLeft;
+        const endLeft = layout.inboxTargetLeft;
+        const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * layout.sarahArcLift;
+        const arcLeft = startLeft + (endLeft - startLeft) * pInbox;
         sarah.style.top = `${arcTop}%`;
         sarah.style.left = `${arcLeft}%`;
         sarah.style.transform = `translate(-50%, -50%) scale(${targetScale})`;
         sarah.style.zIndex = "30";
         sarah.style.opacity = "1";
+      } else if (sarah) {
+        sarah.style.top = `${layout.sarahStartTop}%`;
+        sarah.style.left = `${layout.sarahStartLeft}%`;
+        sarah.style.zIndex = "30";
       }
 
       // Handle Priority Tags (fade in after arrival in the tray)
@@ -410,36 +474,62 @@ export default function useScene() {
           if (!path) return;
 
           const src = document.getElementById(`wf-node-${c.src}`);
-          const tgt = document.getElementById(`wf-node-${c.tgt}`);
+          const targetNodeId = isCompact && c.tgtAlt ? c.tgtAlt : c.tgt;
+          const tgt = document.getElementById(`wf-node-${targetNodeId}`);
 
           if (src && tgt) {
             const srcRect = src.getBoundingClientRect();
             const tgtRect = tgt.getBoundingClientRect();
+            if (isCompact) {
+              // In compact mode, routes flow downward: bottom of source to top of target.
+              const srcCenterX = srcRect.left + srcRect.width * 0.5 - svgRect.left;
+              const tgtCenterX = tgtRect.left + tgtRect.width * 0.5 - svgRect.left;
 
-            const x1 = srcRect.right - svgRect.left;
-            const y1 = srcRect.top + srcRect.height * (0.5 + c.srcOff) - svgRect.top;
+              let x1: number;
+              let y1: number;
+              let x2: number;
+              let y2: number;
 
-            let x2 = tgtRect.left - svgRect.left;
-            let y2 = tgtRect.top + tgtRect.height * (0.5 + c.tgtOff) - svgRect.top;
-
-            if (c.tgtAlt && c.tgt !== c.tgtAlt) {
-              const splitProgress = smoothstep(1.30, 1.38, p);
-              const tgtAlt = document.getElementById(`wf-node-${c.tgtAlt}`);
-              if (tgtAlt) {
-                const altRect = tgtAlt.getBoundingClientRect();
-                const altX2 = altRect.left - svgRect.left;
-                const altY2 = altRect.top + altRect.height * (0.5 + c.tgtOff) - svgRect.top;
-
-                x2 = x2 + (altX2 - x2) * splitProgress;
-                y2 = y2 + (altY2 - y2) * splitProgress;
+              if (c.src === 'david' && c.tgt === 'stats') {
+                x1 = srcCenterX + srcRect.width * c.srcOff * 0.18;
+                y1 = srcRect.bottom - svgRect.top;
+                x2 = tgtCenterX + tgtRect.width * c.tgtOff * 0.16;
+                y2 = tgtRect.top - svgRect.top;
+              } else {
+                x1 = srcCenterX + srcRect.width * c.srcOff * 0.22;
+                y1 = srcRect.bottom - svgRect.top;
+                x2 = tgtCenterX;
+                y2 = tgtRect.top - svgRect.top;
               }
+
+              const dy = Math.max(24, Math.abs(y2 - y1) * 0.45);
+              path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${y1 + dy} ${x2} ${y2 - dy} ${x2} ${y2}`);
+            } else {
+              const x1 = srcRect.right - svgRect.left;
+              const y1 = srcRect.top + srcRect.height * (0.5 + c.srcOff) - svgRect.top;
+
+              let x2 = tgtRect.left - svgRect.left;
+              let y2 = tgtRect.top + tgtRect.height * (0.5 + c.tgtOff) - svgRect.top;
+
+              if (c.tgtAlt && c.tgt !== c.tgtAlt) {
+                const splitProgress = smoothstep(1.26, 1.34, p);
+                const tgtAlt = document.getElementById(`wf-node-${c.tgtAlt}`);
+                if (tgtAlt) {
+                  const altRect = tgtAlt.getBoundingClientRect();
+                  const altX2 = altRect.left - svgRect.left;
+                  const altY2 = altRect.top + altRect.height * (0.5 + c.tgtOff) - svgRect.top;
+
+                  x2 = x2 + (altX2 - x2) * splitProgress;
+                  y2 = y2 + (altY2 - y2) * splitProgress;
+                }
+              }
+
+              const dx = Math.max(30, (x2 - x1) * 0.4);
+              path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`);
             }
 
-            const dx = Math.max(30, (x2 - x1) * 0.4);
-            path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`);
-
-            // Lines must be fully drawn before p=1.40
-            const currentP = smoothstep(1.30 + i * 0.02, 1.38 + i * 0.02, p);
+            // Lines complete before inbox takeover starts.
+            const currentP = smoothstep(1.26 + i * 0.02, 1.34 + i * 0.02, p);
 
             const len = path.getTotalLength() || 1000;
             path.style.strokeDasharray = `${len}`;
@@ -527,17 +617,14 @@ export default function useScene() {
       });
 
       masterTl.addLabel('section-hero', 0);
-      masterTl.to(sceneState, { cameraX: -80, cameraY: 800, cameraZ: 1410, rotationX: -0.92, rotationZ: -0.24, planeRotationZ: -0.46, duration: 0.35, ease: 'power1.inOut', onUpdate: applySceneState }, 0);
-
       masterTl.addLabel('section-problem', 0.35);
-      masterTl.to(sceneState, { cameraX: 0, cameraY: 740, cameraZ: 1230, rotationX: -0.84, rotationZ: -0.16, planeRotationZ: -0.34, duration: 0.35, ease: 'power1.inOut', onUpdate: applySceneState }, 0.35);
-
       masterTl.addLabel('section-visualise', 0.70);
-      masterTl.to(sceneState, { cameraX: 160, cameraY: 620, cameraZ: 1010, rotationX: -0.66, rotationZ: -0.06, planeRotationZ: -0.14, heightScale: 100, duration: 0.35, ease: 'power2.inOut', onUpdate: applySceneState }, 0.70);
+      // Hold camera state throughout visualise section (no interpolation toward profile tween)
+      masterTl.to(sceneState, { duration: 0.29, onUpdate: applySceneState }, 0.70);
 
-      masterTl.addLabel('section-profile', 1.05);
-      // Even MORE aggressive zoom and rotation for the profile focus
-      masterTl.to(sceneState, { cameraX: 280, cameraY: 180, cameraZ: 320, rotationX: -0.25, rotationZ: 0, planeRotationZ: 0, heightScale: 40, duration: 0.35, ease: 'power3.inOut', onUpdate: applySceneState }, 1.05);
+      masterTl.addLabel('section-profile', profileMotionStart);
+      // Earlier profile onset plus stronger left/down/in swoop.
+      masterTl.to(sceneState, { cameraX: profileSwoop.endX, cameraY: profileSwoop.endY, cameraZ: profileSwoop.endZ, rotationX: -0.94, rotationZ: -0.20, duration: 0.35, ease: 'power2.inOut', onUpdate: applySceneState }, profileMotionStart);
 
       masterTl.addLabel('section-workflow', 1.35);
       masterTl.addLabel('section-workflow-end', 1.40);

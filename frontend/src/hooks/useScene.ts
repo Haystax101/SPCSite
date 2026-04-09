@@ -266,6 +266,7 @@ export default function useScene() {
     }
 
     function updateNodeStageState() {
+      const isPhone = window.innerWidth < 640;
       const hideOthers = smoothstep(1.05, 1.15, scrollProgress);
       const workflowTakeover = smoothstep(1.28, 1.38, scrollProgress);
 
@@ -277,9 +278,9 @@ export default function useScene() {
 
         // Keep David and camera motion coupled with a single diagonal progress curve.
         const xMotion = clamp01((sceneState.cameraX - profileSwoop.startX) / (profileSwoop.endX - profileSwoop.startX));
-        const compensatedLeft = 45 + xMotion * 30.0;
+        const compensatedLeft = (isPhone ? 41 : 45) + xMotion * (isPhone ? 24.0 : 30.0);
         // Downward and sideways movement happen simultaneously for a clean diagonal.
-        const compensatedTop = 46 + xMotion * 1.8;
+        const compensatedTop = (isPhone ? 48 : 46) + xMotion * (isPhone ? 1.2 : 1.8);
         nodeDavid.style.left = `${compensatedLeft.toFixed(3)}%`;
         nodeDavid.style.top = `${compensatedTop.toFixed(3)}%`;
 
@@ -298,15 +299,15 @@ export default function useScene() {
       const isCompact = viewportWidth < 1140;
       const layout = {
         // Compact mode (<1140px) uses a vertical flow with a horizontal bottom row.
-        davidTop: isCompact ? (isPhone ? 33 : 35) : 66,
+        davidTop: isCompact ? (isPhone ? 30 : 32) : 66,
         davidLeft: isCompact ? 50 : 19.5,
         statsTop: isCompact ? (isPhone ? 52 : 55) : 66,
         statsLeft: 50,
-        sarahStartTop: isCompact ? (isPhone ? 78 : 76) : 42,
-        elenaStartTop: isCompact ? (isPhone ? 78 : 76) : 66,
-        michaelStartTop: isCompact ? (isPhone ? 78 : 76) : 90,
+        sarahStartTop: isCompact ? (isPhone ? 80 : 78) : 42,
+        elenaStartTop: isCompact ? (isPhone ? 80 : 78) : 66,
+        michaelStartTop: isCompact ? (isPhone ? 80 : 78) : 90,
         sarahStartLeft: isCompact ? (isPhone ? 21 : 24) : 85,
-        elenaStartLeft: 50,
+        elenaStartLeft: isCompact ? 50 : 85,
         michaelStartLeft: isCompact ? (isPhone ? 79 : 76) : 85,
         sarahEndTop: isCompact ? (isPhone ? 37 : 35) : 32,
         elenaEndTop: isCompact ? (isPhone ? 46 : 44) : 42,
@@ -450,6 +451,13 @@ export default function useScene() {
         sarah.style.zIndex = "30";
       }
 
+      // Remove the bottom-node connector dots as inbox takeover begins.
+      const dotOut = smoothstep(1.44, 1.50, scrollProgress);
+      ['elena', 'sarah', 'michael'].forEach(id => {
+        const dot = document.getElementById(`wf-dot-${id}`);
+        if (dot) dot.style.opacity = (1.0 - dotOut).toFixed(4);
+      });
+
       // Handle Priority Tags (fade in after arrival in the tray)
       const tagP = smoothstep(1.48, 1.55, scrollProgress);
       ['elena', 'sarah', 'michael'].forEach(id => {
@@ -491,12 +499,12 @@ export default function useScene() {
               let y2: number;
 
               if (c.src === 'david' && c.tgt === 'stats') {
-                x1 = srcCenterX + srcRect.width * c.srcOff * 0.18;
+                x1 = srcCenterX + srcRect.width * c.srcOff * 0.40;
                 y1 = srcRect.bottom - svgRect.top;
-                x2 = tgtCenterX + tgtRect.width * c.tgtOff * 0.16;
+                x2 = tgtCenterX + tgtRect.width * c.tgtOff * 0.40;
                 y2 = tgtRect.top - svgRect.top;
               } else {
-                x1 = srcCenterX + srcRect.width * c.srcOff * 0.22;
+                x1 = srcCenterX + srcRect.width * c.srcOff * 0.42;
                 y1 = srcRect.bottom - svgRect.top;
                 x2 = tgtCenterX;
                 y2 = tgtRect.top - svgRect.top;

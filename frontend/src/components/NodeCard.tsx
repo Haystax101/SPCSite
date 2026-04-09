@@ -30,9 +30,9 @@ export default function NodeCard({
   }[colorTheme];
 
   return (
-    <div id={id} data-large={defaultLarge ? "true" : "false"} className={`absolute flex flex-col items-center group/node cursor-pointer hover:scale-105 pointer-events-auto transition-transform duration-300 ${className}`}>
+    <div id={id} data-large={defaultLarge ? "true" : "false"} className={`absolute flex flex-col items-center group/node cursor-pointer hover:scale-105 max-[640px]:hover:scale-100 pointer-events-auto transition-transform duration-300 ${className}`}>
       
-      <div className="absolute bottom-full mb-1.5 group-data-[large=true]/node:mb-[0.8rem] group-data-[large=true]/node:translate-x-[5.5rem] -translate-y-1 opacity-100 z-10 w-max pointer-events-none transition-all duration-300">
+      <div className="absolute bottom-full mb-1.5 group-data-[large=true]/node:mb-[0.8rem] group-data-[large=true]/node:translate-x-[5.5rem] max-[640px]:group-data-[large=true]/node:translate-x-[3.6rem] -translate-y-1 opacity-100 z-10 w-max pointer-events-none transition-all duration-300 max-[640px]:scale-[0.86] max-[640px]:origin-bottom">
         <div className="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-2.5 group-data-[large=true]/node:p-3.5 shadow-2xl flex items-center gap-3 group-data-[large=true]/node:gap-4 relative transition-all duration-300">
           <img src={avatarUrl} alt="Avatar" className="w-8 h-8 group-data-[large=true]/node:w-12 group-data-[large=true]/node:h-12 rounded-full border border-gray-600 transition-all duration-300" />
           <div className="pr-1">
@@ -45,7 +45,7 @@ export default function NodeCard({
           </div>
           
           {showMatch && match && (
-            <div className={`ml-2 group-data-[large=true]/node:ml-3 ${themeStyles.bg} ${themeStyles.text} text-[9px] group-data-[large=true]/node:text-[11px] font-bold px-2 py-1 rounded-md transition-all duration-300 group-data-[large=true]/node:hidden`}>
+            <div className={`ml-2 group-data-[large=true]/node:ml-3 ${themeStyles.bg} ${themeStyles.text} text-[9px] group-data-[large=true]/node:text-[11px] font-bold px-2 py-1 rounded-md transition-all duration-300 group-data-[large=true]/node:hidden max-[640px]:hidden`}>
               {match}% Match
             </div>
           )}

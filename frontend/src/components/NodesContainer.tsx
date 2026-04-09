@@ -11,7 +11,7 @@ export default function NodesContainer() {
         match={98}
         avatarUrl="https://i.pravatar.cc/100?img=11"
         colorTheme="green"
-        className="top-[46%] left-[45%]"
+        className="top-[46%] left-[45%] max-[640px]:top-[49%] max-[640px]:left-[37%]"
         defaultLarge={false}
       />
 
@@ -22,7 +22,7 @@ export default function NodesContainer() {
         match={72}
         avatarUrl="https://i.pravatar.cc/100?img=47"
         colorTheme="orange"
-        className="top-[35%] left-[55%]"
+        className="top-[35%] left-[55%] max-[640px]:top-[33%] max-[640px]:left-[68%]"
       />
 
       <NodeCard
@@ -32,7 +32,7 @@ export default function NodesContainer() {
         match={24}
         avatarUrl="https://i.pravatar.cc/100?img=33"
         colorTheme="red"
-        className="bottom-[28%] left-[25%]"
+        className="bottom-[28%] left-[25%] max-[640px]:bottom-[24%] max-[640px]:left-[23%]"
       />
 
     </div>

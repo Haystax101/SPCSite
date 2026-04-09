@@ -580,6 +580,20 @@
       transition: opacity 0.2s ease;
     }
 
+#wf-stats-mobile-glow {
+  --wf-glow-progress: 0;
+  background: conic-gradient(
+    from -90deg,
+    rgba(250, 204, 21, 0.86) calc(var(--wf-glow-progress) * 1turn),
+    rgba(250, 204, 21, 0.06) 0
+  );
+  padding: 2px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.45));
+}
+
 @media (max-width: 640px) {
   .wf-topbar {
     padding: 14px 16px 6px;

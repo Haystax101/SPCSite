@@ -299,19 +299,19 @@ export default function useScene() {
       const isCompact = viewportWidth < 1140;
       const layout = {
         // Compact mode (<1140px) uses a vertical flow with a horizontal bottom row.
-        davidTop: isCompact ? (isPhone ? 30 : 32) : 66,
+        davidTop: isCompact ? (isPhone ? 33 : 32) : 66,
         davidLeft: isCompact ? 50 : 19.5,
-        statsTop: isCompact ? (isPhone ? 52 : 55) : 66,
+        statsTop: isCompact ? (isPhone ? 55 : 55) : 66,
         statsLeft: 50,
-        sarahStartTop: isCompact ? (isPhone ? 80 : 78) : 42,
-        elenaStartTop: isCompact ? (isPhone ? 80 : 78) : 66,
-        michaelStartTop: isCompact ? (isPhone ? 80 : 78) : 90,
+        sarahStartTop: isCompact ? (isPhone ? 83 : 78) : 42,
+        elenaStartTop: isCompact ? (isPhone ? 83 : 78) : 66,
+        michaelStartTop: isCompact ? (isPhone ? 83 : 78) : 90,
         sarahStartLeft: isCompact ? (isPhone ? 21 : 24) : 85,
         elenaStartLeft: isCompact ? 50 : 85,
         michaelStartLeft: isCompact ? (isPhone ? 79 : 76) : 85,
-        sarahEndTop: isCompact ? (isPhone ? 37 : 35) : 32,
-        elenaEndTop: isCompact ? (isPhone ? 46 : 44) : 42,
-        michaelEndTop: isCompact ? (isPhone ? 55 : 53) : 52,
+        sarahEndTop: isCompact ? (isPhone ? 45 : 35) : 32,
+        elenaEndTop: isCompact ? (isPhone ? 54 : 44) : 42,
+        michaelEndTop: isCompact ? (isPhone ? 65 : 53) : 52,
         sarahArcLift: isCompact ? (isPhone ? 10 : 12) : 20,
         elenaArcLift: isCompact ? (isPhone ? 8 : 10) : 15,
         michaelArcLift: isCompact ? (isPhone ? 6 : 8) : 10,
@@ -322,6 +322,14 @@ export default function useScene() {
       const p = Math.min(1.5, Math.max(0, scrollProgress));
       const sectionIn = smoothstep(1.30, 1.38, scrollProgress);
       workflowSection.style.opacity = Math.max(0, Math.min(1, sectionIn)).toFixed(4);
+
+      const statsGlow = document.getElementById('wf-stats-mobile-glow');
+      if (statsGlow && isPhone) {
+        // Mobile-only: draw a clockwise glow around stats from 12 o'clock through workflow progress.
+        const glowP = smoothstep(1.30, 1.50, scrollProgress);
+        statsGlow.style.setProperty('--wf-glow-progress', glowP.toFixed(4));
+        statsGlow.style.opacity = (0.35 + glowP * 0.65).toFixed(4);
+      }
 
       const wfNodes = [
         { id: 'david', delay: 0.00 },
@@ -334,6 +342,10 @@ export default function useScene() {
       wfNodes.forEach(node => {
         const el = document.getElementById(`wf-node-${node.id}`);
         if (el) {
+          if (isPhone && node.id !== 'stats') {
+            el.style.opacity = '0';
+            return;
+          }
           const pop = smoothstep(0.91 + node.delay * 0.04, 0.96 + node.delay * 0.04, p);
           el.style.opacity = pop.toFixed(4);
           el.style.transform = `translate(-50%, -50%) scale(${(0.85 + 0.15 * pop).toFixed(4)})`;
@@ -369,7 +381,7 @@ export default function useScene() {
       if (lines) {
         // Fade lines out during the INBOX transition (1.42 onwards)
         const linesOut = smoothstep(1.44, 1.47, scrollProgress);
-        lines.style.opacity = (1.0 - linesOut).toFixed(4);
+        lines.style.opacity = isPhone ? '0' : (1.0 - linesOut).toFixed(4);
       }
 
       // Handle the nodes (David and Stats image fade out during inbox transition)
@@ -383,7 +395,9 @@ export default function useScene() {
         statsNode.style.top = `${layout.statsTop}%`;
         statsNode.style.left = `${layout.statsLeft}%`;
       }
-      if (davidNode && scrollProgress > 1.02) davidNode.style.opacity = bgOpacity;
+      if (davidNode && scrollProgress > 1.02) {
+        davidNode.style.opacity = isPhone ? '0' : bgOpacity;
+      }
       if (statsNode && scrollProgress > 1.02) statsNode.style.opacity = bgOpacity;
 
       const inboxMotionStart = 1.48;
@@ -413,6 +427,7 @@ export default function useScene() {
         michael.style.top = `${layout.michaelStartTop}%`;
         michael.style.left = `${layout.michaelStartLeft}%`;
         michael.style.zIndex = "30";
+        if (isPhone) michael.style.opacity = '0';
       }
 
       if (elena && scrollProgress > inboxMotionStart) {
@@ -431,6 +446,7 @@ export default function useScene() {
         elena.style.top = `${layout.elenaStartTop}%`;
         elena.style.left = `${layout.elenaStartLeft}%`;
         elena.style.zIndex = "30";
+        if (isPhone) elena.style.opacity = '0';
       }
 
       if (sarah && scrollProgress > inboxMotionStart) {
@@ -449,6 +465,7 @@ export default function useScene() {
         sarah.style.top = `${layout.sarahStartTop}%`;
         sarah.style.left = `${layout.sarahStartLeft}%`;
         sarah.style.zIndex = "30";
+        if (isPhone) sarah.style.opacity = '0';
       }
 
       // Remove the bottom-node connector dots as inbox takeover begins.
@@ -476,6 +493,10 @@ export default function useScene() {
 
       const svgNode = document.getElementById('workflow-lines');
       if (svgNode) {
+        if (isPhone) {
+          svgNode.style.opacity = '0';
+          return;
+        }
         const svgRect = svgNode.getBoundingClientRect();
         paths.forEach((c, i) => {
           const path = document.getElementById(c.id) as unknown as SVGPathElement;

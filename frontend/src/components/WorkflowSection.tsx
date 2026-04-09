@@ -14,7 +14,7 @@ export default function WorkflowSection() {
       }}></div>
 
       {/* Physical Inbox Graphic (Tray) - Migrated here to stay in the same stacking context as nodes */}
-      <div id="physical-inbox" className="absolute top-[42%] max-[1140px]:top-[46%] max-[640px]:top-[51%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[320px] max-[1140px]:w-[360px] max-[1140px]:h-[245px] max-[640px]:w-[268px] max-[640px]:h-[188px] pointer-events-none opacity-0 transition-opacity z-10">
+      <div id="physical-inbox" className="absolute top-[42%] max-[1140px]:top-[46%] max-[640px]:top-[54%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[320px] max-[1140px]:w-[360px] max-[1140px]:h-[245px] max-[640px]:w-[268px] max-[640px]:h-[232px] pointer-events-none opacity-0 transition-opacity z-10">
         {/* Back Plane of the Tray */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/[0.05] border border-white/20 rounded-[2rem] max-[1140px]:rounded-[1.5rem] max-[640px]:rounded-[1.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-25">
           {/* Inner side lighting */}
@@ -32,7 +32,7 @@ export default function WorkflowSection() {
 
 
       {/* Workflow Text */}
-      <div id="wf-bg-text" className="absolute top-[12%] max-[1140px]:top-[9%] max-[640px]:top-[8.5%] left-1/2 -translate-x-1/2 w-full text-center max-w-4xl px-6 max-[1140px]:px-4 max-[640px]:px-3 pointer-events-none z-20 transition-opacity">
+      <div id="wf-bg-text" className="absolute top-[12%] max-[1140px]:top-[9%] max-[640px]:top-[11%] left-1/2 -translate-x-1/2 w-full text-center max-w-4xl px-6 max-[1140px]:px-4 max-[640px]:px-3 pointer-events-none z-20 transition-opacity">
         <h2 className="text-[2.8rem] max-[1140px]:text-[1.9rem] max-[640px]:text-[1.22rem] font-bold text-white tracking-tight drop-shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-4 max-[1140px]:mb-3 max-[640px]:mb-1.5 leading-[1.1]">
           You already know how the conversation ends. 
         </h2>
@@ -41,7 +41,7 @@ export default function WorkflowSection() {
         </p>
       </div>
 
-      <svg id="workflow-lines" className="absolute inset-0 w-full h-full z-15">
+      <svg id="workflow-lines" className="absolute inset-0 w-full h-full z-15 max-[640px]:hidden">
         {/* SVG Bezier Curves for Nodes. */}
         <path id="path-david-stats-1" className="workflow-link stroke-yellow-400 stroke-[2] fill-none" d="M 0 0 C 0 0 0 0 0 0" />
         <path id="path-david-stats-2" className="workflow-link stroke-yellow-400 stroke-[2] fill-none" d="M 0 0 C 0 0 0 0 0 0" />
@@ -67,14 +67,15 @@ export default function WorkflowSection() {
       {/* Node 2: Stats Image */}
       <div id="wf-node-stats" className="workflow-card absolute transition-all will-change-[transform,opacity] opacity-0 z-30 w-[340px] max-[1140px]:w-[260px] max-[640px]:w-[182px]" style={{ top: '66%', left: '50%', transform: 'translate(-50%, -50%) scale(0.95)' }}>
         <div className="relative w-full h-full p-2 max-[640px]:p-1.5 border border-white/10 rounded-xl max-[640px]:rounded-lg bg-[#111] shadow-2xl flex flex-col justify-center">
+          <div id="wf-stats-mobile-glow" className="hidden max-[640px]:block absolute -inset-[2px] rounded-lg pointer-events-none"></div>
           <img src={statsImg} alt="Stats" className="w-full h-auto rounded-lg" />
-          <div className="absolute left-[-6px] max-[640px]:left-[-5px] top-[25%] -translate-y-1/2 max-[1140px]:left-[40%] max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 max-[640px]:top-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-gray-500"></div>
-          <div className="absolute left-[-6px] max-[640px]:left-[-5px] top-1/2 -translate-y-1/2 max-[1140px]:left-1/2 max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 max-[640px]:top-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-gray-500"></div>
-          <div className="absolute left-[-6px] max-[640px]:left-[-5px] top-[75%] -translate-y-1/2 max-[1140px]:left-[60%] max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 max-[640px]:top-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-gray-500"></div>
+          <div className="absolute left-[-6px] max-[640px]:hidden top-[25%] -translate-y-1/2 max-[1140px]:left-[40%] max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 w-3 h-3 rounded-full bg-[#111] border-[2px] border-gray-500"></div>
+          <div className="absolute left-[-6px] max-[640px]:hidden top-1/2 -translate-y-1/2 max-[1140px]:left-1/2 max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 w-3 h-3 rounded-full bg-[#111] border-[2px] border-gray-500"></div>
+          <div className="absolute left-[-6px] max-[640px]:hidden top-[75%] -translate-y-1/2 max-[1140px]:left-[60%] max-[1140px]:top-[-6px] max-[1140px]:-translate-x-1/2 max-[1140px]:-translate-y-0 w-3 h-3 rounded-full bg-[#111] border-[2px] border-gray-500"></div>
 
-          <div className="absolute right-[-6px] max-[640px]:right-[-5px] top-[25%] -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-[40%] max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 max-[640px]:bottom-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-yellow-400"></div>
-          <div className="absolute right-[-6px] max-[640px]:right-[-5px] top-1/2 -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-1/2 max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 max-[640px]:bottom-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-yellow-400"></div>
-          <div className="absolute right-[-6px] max-[640px]:right-[-5px] top-[75%] -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-[60%] max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 max-[640px]:bottom-[-5px] w-3 h-3 max-[640px]:w-2.5 max-[640px]:h-2.5 rounded-full bg-[#111] border-[2px] max-[640px]:border-[1.5px] border-yellow-400"></div>
+          <div className="absolute right-[-6px] max-[640px]:hidden top-[25%] -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-[40%] max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 w-3 h-3 rounded-full bg-[#111] border-[2px] border-yellow-400"></div>
+          <div className="absolute right-[-6px] max-[640px]:hidden top-1/2 -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-1/2 max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 w-3 h-3 rounded-full bg-[#111] border-[2px] border-yellow-400"></div>
+          <div className="absolute right-[-6px] max-[640px]:hidden top-[75%] -translate-y-1/2 max-[1140px]:right-auto max-[1140px]:left-[60%] max-[1140px]:top-auto max-[1140px]:bottom-[-6px] max-[1140px]:-translate-y-0 max-[1140px]:-translate-x-1/2 w-3 h-3 rounded-full bg-[#111] border-[2px] border-yellow-400"></div>
         </div>
       </div>
 

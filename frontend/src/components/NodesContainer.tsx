@@ -32,7 +32,7 @@ export default function NodesContainer() {
         match={24}
         avatarUrl="https://i.pravatar.cc/100?img=33"
         colorTheme="red"
-        className="bottom-[28%] left-[25%] max-[640px]:bottom-[24%] max-[640px]:left-[23%]"
+        className="bottom-[28%] left-[25%] max-[640px]:bottom-[28%] max-[640px]:left-[23%]"
       />
 
     </div>

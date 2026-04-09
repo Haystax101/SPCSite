@@ -10,7 +10,7 @@
     html {
         width: 100%;
         /* Extended scroll room */
-        height: 1500vh;
+        height: 1125vh;
         background-color: #000;
         color: #fff;
         overflow-x: hidden;

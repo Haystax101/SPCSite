@@ -185,26 +185,28 @@ export default function useScene() {
 
     function updateOpacityState() {
       const p = scrollProgress;
-      if (heroText) heroText.style.opacity = Math.max(0, 1 - p * 2.5).toString();
-      if (problemText) problemText.style.opacity = Math.max(0, Math.min(1, smoothstep(0.35, 0.45, p) * (1 - smoothstep(0.75, 0.85, p)))).toString();
-      if (visualiseTitle) visualiseTitle.style.opacity = Math.max(0, Math.min(1, smoothstep(0.80, 0.90, p) * (1 - smoothstep(1.15, 1.25, p)))).toString();
-      if (visualiseText) visualiseText.style.opacity = Math.max(0, Math.min(1, smoothstep(0.80, 0.90, p) * (1 - smoothstep(1.15, 1.25, p)))).toString();
+      if (heroText) heroText.style.opacity = Math.max(0, 1 - p * 4).toString();
+      if (problemText) problemText.style.opacity = Math.max(0, Math.min(1, smoothstep(0.28, 0.36, p) * (1 - smoothstep(0.58, 0.66, p)))).toString();
+      if (visualiseTitle) visualiseTitle.style.opacity = Math.max(0, Math.min(1, smoothstep(0.65, 0.72, p) * (1 - smoothstep(0.92, 0.98, p)))).toString();
+      if (visualiseText) visualiseText.style.opacity = Math.max(0, Math.min(1, smoothstep(0.65, 0.72, p) * (1 - smoothstep(0.92, 0.98, p)))).toString();
 
       if (nodesContainer) {
-        // Reveal nodes ONLY once the "But now it does" text appears (0.80+)
-        const nodeOpacity = smoothstep(0.80, 0.95, p);
+        // Reveal nodes ONLY once the "But now it does" text appears (0.70-0.80)
+        const nodeOpacity = smoothstep(0.70, 0.85, p);
         nodesContainer.style.opacity = nodeOpacity.toString();
       }
 
       if (profileText) {
-        const profileIn = smoothstep(1.20, 1.30, p);
-        const profileOut = 1 - smoothstep(1.48, 1.55, p);
+        // Profile section: "It all starts with you"
+        const profileIn = smoothstep(1.00, 1.10, p);
+        const profileOut = 1 - smoothstep(1.25, 1.32, p);
         profileText.style.opacity = Math.max(0, Math.min(1, profileIn * profileOut)).toString();
       }
 
       const canvas = document.getElementById('network-canvas');
       if (canvas) {
-        const fadeOutCanvas = smoothstep(1.50, 1.60, p);
+        // Keep canvas visible until the workflow section takeover
+        const fadeOutCanvas = smoothstep(1.28, 1.38, p);
         canvas.style.opacity = (1 - fadeOutCanvas).toFixed(4);
       }
 
@@ -214,7 +216,7 @@ export default function useScene() {
 
       const inboxSection = document.getElementById('inbox-section');
       if (inboxSection) {
-        const inboxIn = smoothstep(1.85, 1.95, p);
+        const inboxIn = smoothstep(1.40, 1.48, p);
         inboxSection.style.opacity = Math.max(0, Math.min(1, inboxIn)).toFixed(4);
         inboxSection.style.transform = `translateY(${(1 - inboxIn) * 30}px)`;
       }
@@ -231,15 +233,17 @@ export default function useScene() {
 
     function applySectionMaskState() {
       if (!sectionMask) return;
-      const p = clamp01(scrollProgress / 2.0); // Normalize to 0-1 for mask logic
+      const p = clamp01(scrollProgress / 1.5); // Normalize to 0-1 for mask logic
 
-      const slideProgress = smoothstep(0.15, 0.25, p);
+      const slideProgress = smoothstep(0.15, 0.30, p);
       const maskCenter = 20 + 60 * slideProgress;
-      const slideOpacity = (1.0 - smoothstep(0.35, 0.45, p)) * (1.0 - smoothstep(0.85, 1.0, p));
+      // Fade out slide mask for Visualize
+      const slideOpacity = (1.0 - smoothstep(0.40, 0.50, p)) * (1.0 - smoothstep(0.85, 1.0, p));
 
-      const visualiseIn = smoothstep(0.40, 0.50, p) * (1.0 - smoothstep(0.85, 0.90, p));
+      const visualiseIn = smoothstep(0.45, 0.55, p) * (1.0 - smoothstep(0.85, 0.92, p));
 
-      const blackout = smoothstep(0.78, 0.85, p);
+      // Delay blackout until the Workflow takeover (around p=0.86 on 0-1 scale, which is 1.30 on 1.5 scale)
+      const blackout = smoothstep(0.86, 0.92, p);
       const ellipseMask = Math.max(0, visualiseIn * (1 - blackout));
 
       sectionMask.style.setProperty('--mask-center', `${maskCenter.toFixed(2)}%`);
@@ -249,16 +253,16 @@ export default function useScene() {
     }
 
     function updateNodeStageState() {
-      const reveal = smoothstep(1.20, 1.40, scrollProgress);
-      const hideOthers = smoothstep(1.20, 1.35, scrollProgress);
-      const workflowTakeover = smoothstep(1.48, 1.58, scrollProgress);
+      const reveal = smoothstep(1.05, 1.18, scrollProgress);
+      const hideOthers = smoothstep(1.05, 1.15, scrollProgress);
+      const workflowTakeover = smoothstep(1.28, 1.38, scrollProgress);
 
       if (nodeElena) nodeElena.style.opacity = ((1 - hideOthers) * (1 - workflowTakeover)).toFixed(4);
       if (nodeMarcus) nodeMarcus.style.opacity = ((1 - hideOthers) * (1 - workflowTakeover)).toFixed(4);
 
       if (nodeDavid) {
         const startLeft = 45;
-        const endLeft = 60;
+        const endLeft = 60; // Positioned slightly to the right for Profile focus
         const startTop = 46;
         const endTop = 50;
         const nextLeft = startLeft + (endLeft - startLeft) * reveal;
@@ -267,7 +271,7 @@ export default function useScene() {
         nodeDavid.style.top = `${nextTop.toFixed(3)}%`;
 
         // Scale David up faster during the focus
-        const profileFocus = smoothstep(1.20, 1.40, scrollProgress);
+        const profileFocus = smoothstep(1.05, 1.18, scrollProgress);
         const profileScale = 1.0 + profileFocus * 0.8;
         nodeDavid.style.transform = `translate(-50%, -50%) scale(${profileScale})`;
         nodeDavid.style.opacity = (1 - workflowTakeover).toFixed(4);
@@ -279,8 +283,8 @@ export default function useScene() {
       const workflowSection = document.getElementById('workflow-section');
       if (!workflowSection) return;
 
-      const p = Math.min(2.0, Math.max(0, scrollProgress));
-      const sectionIn = smoothstep(1.50, 1.62, scrollProgress);
+      const p = Math.min(1.5, Math.max(0, scrollProgress));
+      const sectionIn = smoothstep(1.30, 1.38, scrollProgress);
       workflowSection.style.opacity = Math.max(0, Math.min(1, sectionIn)).toFixed(4);
 
       const wfNodes = [
@@ -302,7 +306,7 @@ export default function useScene() {
 
 
       // Fade out specific workflow background elements during inbox transition
-      const outP = smoothstep(1.85, 1.95, scrollProgress);
+      const outP = smoothstep(1.40, 1.48, scrollProgress);
       const bgOpacity = (1.0 - outP).toFixed(4);
 
       const grid = document.getElementById('wf-bg-grid');
@@ -322,13 +326,13 @@ export default function useScene() {
       // Fade in the physical inbox tray as we transition
       const tray = document.getElementById('physical-inbox');
       if (tray) {
-        const trayIn = smoothstep(1.85, 1.95, scrollProgress);
+        const trayIn = smoothstep(1.40, 1.48, scrollProgress);
         tray.style.opacity = trayIn.toFixed(4);
       }
 
       if (lines) {
-        // Fade lines out during the INBOX transition (1.85 onwards)
-        const linesOut = smoothstep(1.85, 1.95, scrollProgress);
+        // Fade lines out during the INBOX transition (1.42 onwards)
+        const linesOut = smoothstep(1.42, 1.48, scrollProgress);
         lines.style.opacity = (1.0 - linesOut).toFixed(4);
       }
 
@@ -338,7 +342,7 @@ export default function useScene() {
       if (davidNode && scrollProgress > 1.02) davidNode.style.opacity = bgOpacity;
       if (statsNode && scrollProgress > 1.02) statsNode.style.opacity = bgOpacity;
 
-      const pInbox = smoothstep(1.85, 2.00, scrollProgress);
+      const pInbox = smoothstep(1.40, 1.50, scrollProgress);
 
       // Animate the 3 cards across arc 
       const sarah = document.getElementById('wf-node-sarah');
@@ -351,7 +355,7 @@ export default function useScene() {
       // They also grow a bit to stand out more (scale 0.95 -> 1.1)
       const targetScale = 1.0 + (0.15 * pInbox);
 
-      if (michael && scrollProgress > 1.70) {
+      if (michael && scrollProgress > 1.35) {
         const startTop = 90;
         const endTop = 52; // Bottom of the tray stack
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 10;
@@ -362,7 +366,7 @@ export default function useScene() {
         michael.style.opacity = "1";
       }
 
-      if (elena && scrollProgress > 1.70) {
+      if (elena && scrollProgress > 1.35) {
         const startTop = 65; // Elena at 65%
         const endTop = 42; // Center of the tray
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 15;
@@ -373,7 +377,7 @@ export default function useScene() {
         elena.style.opacity = "1";
       }
 
-      if (sarah && scrollProgress > 1.70) {
+      if (sarah && scrollProgress > 1.35) {
         const startTop = 40; // Sarah moved to 40%
         const endTop = 32; // Top of the tray stack
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 20;
@@ -385,7 +389,7 @@ export default function useScene() {
       }
 
       // Handle Priority Tags (fade in after arrival in the tray)
-      const tagP = smoothstep(1.92, 2.00, scrollProgress);
+      const tagP = smoothstep(1.44, 1.52, scrollProgress);
       ['elena', 'sarah', 'michael'].forEach(id => {
         const tag = document.getElementById(`priority-tag-${id}`);
         if (tag) tag.style.opacity = tagP.toFixed(4);
@@ -436,7 +440,7 @@ export default function useScene() {
             const dx = Math.max(30, (x2 - x1) * 0.4);
             path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`);
 
-            const currentP = smoothstep(1.68 + i * 0.01, 1.82 + i * 0.01, p);
+            const currentP = smoothstep(1.38 + i * 0.01, 1.44 + i * 0.01, p);
 
             const len = path.getTotalLength() || 1000;
             path.style.strokeDasharray = `${len}`;
@@ -517,27 +521,28 @@ export default function useScene() {
           scrub: 0.55,
           fastScrollEnd: 3000,
           onUpdate: (self) => {
-            scrollProgress = self.progress * 2.0;
+            scrollProgress = self.progress * 1.5;
             updateOpacityState();
           }
         }
       });
 
       masterTl.addLabel('section-hero', 0);
-      masterTl.to(sceneState, { cameraX: -80, cameraY: 800, cameraZ: 1410, rotationX: -0.92, rotationZ: -0.24, planeRotationZ: -0.46, duration: 0.40, ease: 'power1.inOut', onUpdate: applySceneState }, 0);
+      masterTl.to(sceneState, { cameraX: -80, cameraY: 800, cameraZ: 1410, rotationX: -0.92, rotationZ: -0.24, planeRotationZ: -0.46, duration: 0.35, ease: 'power1.inOut', onUpdate: applySceneState }, 0);
 
-      masterTl.addLabel('section-problem', 0.40);
-      masterTl.to(sceneState, { cameraX: 0, cameraY: 740, cameraZ: 1230, rotationX: -0.84, rotationZ: -0.16, planeRotationZ: -0.34, duration: 0.40, ease: 'power1.inOut', onUpdate: applySceneState }, 0.40);
+      masterTl.addLabel('section-problem', 0.35);
+      masterTl.to(sceneState, { cameraX: 0, cameraY: 740, cameraZ: 1230, rotationX: -0.84, rotationZ: -0.16, planeRotationZ: -0.34, duration: 0.35, ease: 'power1.inOut', onUpdate: applySceneState }, 0.35);
 
-      masterTl.addLabel('section-visualise', 0.80);
-      masterTl.to(sceneState, { cameraX: 160, cameraY: 620, cameraZ: 1010, rotationX: -0.66, rotationZ: -0.06, planeRotationZ: -0.14, heightScale: 100, duration: 0.40, ease: 'power2.inOut', onUpdate: applySceneState }, 0.80);
+      masterTl.addLabel('section-visualise', 0.70);
+      masterTl.to(sceneState, { cameraX: 160, cameraY: 620, cameraZ: 1010, rotationX: -0.66, rotationZ: -0.06, planeRotationZ: -0.14, heightScale: 100, duration: 0.35, ease: 'power2.inOut', onUpdate: applySceneState }, 0.70);
 
-      masterTl.addLabel('section-profile', 1.20);
-      masterTl.to(sceneState, { cameraX: 280, cameraY: 180, cameraZ: 320, rotationX: -0.25, rotationZ: 0, planeRotationZ: 0, heightScale: 40, duration: 0.35, ease: 'power3.inOut', onUpdate: applySceneState }, 1.20);
+      masterTl.addLabel('section-profile', 1.05);
+      // Even MORE aggressive zoom and rotation for the profile focus
+      masterTl.to(sceneState, { cameraX: 280, cameraY: 180, cameraZ: 320, rotationX: -0.25, rotationZ: 0, planeRotationZ: 0, heightScale: 40, duration: 0.35, ease: 'power3.inOut', onUpdate: applySceneState }, 1.05);
 
-      masterTl.addLabel('section-workflow', 1.60);
-      masterTl.addLabel('section-workflow-end', 1.80);
-      masterTl.addLabel('section-inbox', 2.00);
+      masterTl.addLabel('section-workflow', 1.35);
+      masterTl.addLabel('section-workflow-end', 1.40);
+      masterTl.addLabel('section-inbox', 1.50);
     }
 
     function initThree() {

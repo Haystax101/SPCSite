@@ -336,13 +336,13 @@ export default function useScene() {
         lines.style.opacity = (1.0 - linesOut).toFixed(4);
       }
 
-      // Handle the nodes
+      // Handle the nodes (David and Stats image fade out during inbox transition)
       const davidNode = document.getElementById('wf-node-david');
       const statsNode = document.getElementById('wf-node-stats');
       if (davidNode && scrollProgress > 1.02) davidNode.style.opacity = bgOpacity;
       if (statsNode && scrollProgress > 1.02) statsNode.style.opacity = bgOpacity;
 
-      const pInbox = smoothstep(1.40, 1.50, scrollProgress);
+      const pInbox = smoothstep(1.42, 1.50, scrollProgress);
 
       // Animate the 3 cards across arc 
       const sarah = document.getElementById('wf-node-sarah');
@@ -350,14 +350,12 @@ export default function useScene() {
       const elena = document.getElementById('wf-node-elena');
 
       // Common arc function for left-x
-      // They start at 85%, end at 50%
       const arcLeft = 85 - (35 * pInbox);
-      // They also grow a bit to stand out more (scale 0.95 -> 1.1)
       const targetScale = 1.0 + (0.15 * pInbox);
 
       if (michael && scrollProgress > 1.35) {
-        const startTop = 90;
-        const endTop = 52; // Bottom of the tray stack
+        const startTop = 96; // Michael at 96%
+        const endTop = 52;
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 10;
         michael.style.top = `${arcTop}%`;
         michael.style.left = `${arcLeft}%`;
@@ -367,8 +365,8 @@ export default function useScene() {
       }
 
       if (elena && scrollProgress > 1.35) {
-        const startTop = 65; // Elena at 65%
-        const endTop = 42; // Center of the tray
+        const startTop = 72; // Elena at 72%
+        const endTop = 42;
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 15;
         elena.style.top = `${arcTop}%`;
         elena.style.left = `${arcLeft}%`;
@@ -378,8 +376,8 @@ export default function useScene() {
       }
 
       if (sarah && scrollProgress > 1.35) {
-        const startTop = 40; // Sarah moved to 40%
-        const endTop = 32; // Top of the tray stack
+        const startTop = 48; // Sarah at 48%
+        const endTop = 32;
         const arcTop = startTop + (endTop - startTop) * pInbox - Math.sin(pInbox * Math.PI) * 20;
         sarah.style.top = `${arcTop}%`;
         sarah.style.left = `${arcLeft}%`;
@@ -389,7 +387,7 @@ export default function useScene() {
       }
 
       // Handle Priority Tags (fade in after arrival in the tray)
-      const tagP = smoothstep(1.44, 1.52, scrollProgress);
+      const tagP = smoothstep(1.48, 1.55, scrollProgress);
       ['elena', 'sarah', 'michael'].forEach(id => {
         const tag = document.getElementById(`priority-tag-${id}`);
         if (tag) tag.style.opacity = tagP.toFixed(4);
@@ -425,7 +423,7 @@ export default function useScene() {
             let y2 = tgtRect.top + tgtRect.height * (0.5 + c.tgtOff) - svgRect.top;
 
             if (c.tgtAlt && c.tgt !== c.tgtAlt) {
-              const splitProgress = smoothstep(0.965, 0.995, p);
+              const splitProgress = smoothstep(1.30, 1.38, p);
               const tgtAlt = document.getElementById(`wf-node-${c.tgtAlt}`);
               if (tgtAlt) {
                 const altRect = tgtAlt.getBoundingClientRect();
@@ -440,7 +438,8 @@ export default function useScene() {
             const dx = Math.max(30, (x2 - x1) * 0.4);
             path.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1} ${x2 - dx} ${y2} ${x2} ${y2}`);
 
-            const currentP = smoothstep(1.38 + i * 0.01, 1.44 + i * 0.01, p);
+            // Lines must be fully drawn before p=1.40
+            const currentP = smoothstep(1.30 + i * 0.02, 1.38 + i * 0.02, p);
 
             const len = path.getTotalLength() || 1000;
             path.style.strokeDasharray = `${len}`;

@@ -1,0 +1,23 @@
+--- site.html
++++ site.html
+@@ -194,6 +194,26 @@
+                 </div>
+ 
++                <!-- NEW: Compatibility Center Panel (Hidden initially) -->
++                <div id="compatibility-panel" class="absolute top-[46%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-auto transition-opacity duration-300 opacity-0 z-20" style="width: 280px; transform-origin: center;">
++                    <!-- Center Panel Content -->
++                </div>
++
++                <!-- NEW: Connecting SVG Lines -->
++                <svg id="connecting-lines" class="absolute inset-0 w-full h-full pointer-events-none z-10" style="opacity: 0; transition: opacity 0.3s;">
++                    <path id="line-david-1" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                    <path id="line-david-2" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                    <path id="line-david-3" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                    
++                    <path id="line-elena-1" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                    <path id="line-elena-2" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                    <path id="line-elena-3" d="M0,0 Q0,0 0,0" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="4" />
++                </svg>
++
+             </div>
+         </div>

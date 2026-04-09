@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Person UI Component - Mid Tier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Standalone Person Overlay Component (Mid Tier Match) -->
+    <div class="relative flex flex-col items-center group cursor-pointer">
+
+        <!-- Info Card (Floats above) -->
+        <div
+            class="absolute bottom-full mb-1.5 opacity-90 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 ease-out z-10 w-max">
+            <div
+                class="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-2.5 shadow-2xl flex items-center gap-3 relative origin-bottom">
+
+                <!-- Avatar -->
+                <div class="relative">
+                    <img src="https://i.pravatar.cc/100?img=47" alt="Avatar"
+                        class="w-8 h-8 rounded-full border border-gray-600 object-cover">
+                </div>
+
+                <!-- Details -->
+                <div class="pr-1">
+                    <div class="text-white text-xs font-semibold tracking-wide">Elena Rostova</div>
+                    <div class="text-gray-400 text-[9px] leading-tight mt-0.5">Angel Investor</div>
+                </div>
+
+                <!-- Match Tag -->
+                <div
+                    class="ml-2 bg-yellow-500/10 text-yellow-500/70 text-[9px] uppercase tracking-wider font-bold px-2 py-1 rounded-md border border-yellow-500/20">
+                    72% Match
+                </div>
+
+                <!-- Down Arrow Tip -->
+                <div
+                    class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-black/70 border-b border-r border-white/10 rotate-45">
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Tether -->
+        <div class="w-px h-6 bg-gradient-to-b from-white/30 to-transparent absolute bottom-1/2 translate-y-1"></div>
+
+        <!-- Anchor Node -->
+        <div class="relative mt-3">
+            <div class="w-2.5 h-2.5 bg-yellow-200 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.4)] relative z-10">
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

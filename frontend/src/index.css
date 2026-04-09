@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+
+    body,
+    html {
+        width: 100%;
+        /* Extended scroll room */
+        height: 1500vh;
+        background-color: #000;
+        color: #fff;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+        font-family: 'Inter', sans-serif;
+    }
+}
+
+.rainbow-text {
+    background-image: linear-gradient(90deg, #4da4b4, #5770c5, #7d49c6, #5770c5, #4da4b4);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: rainbowScroll 4s ease-in-out infinite;
+}
+
+@keyframes rainbowScroll {
+    to {
+        background-position: 200% center;
+    }
+}
+
+@keyframes wordScroll {
+
+    0%,
+    12% {
+        transform: translateY(0);
+    }
+
+    16%,
+    28% {
+        transform: translateY(-14.28%);
+    }
+
+    33%,
+    45% {
+        transform: translateY(-28.57%);
+    }
+
+    50%,
+    62% {
+        transform: translateY(-42.85%);
+    }
+
+    66%,
+    78% {
+        transform: translateY(-57.14%);
+    }
+
+    83%,
+    95% {
+        transform: translateY(-71.42%);
+    }
+
+    100% {
+        transform: translateY(-85.71%);
+    }
+}
+
+.scrolling-words {
+    animation: wordScroll 10s cubic-bezier(0.8, 0, 0.2, 1) infinite;
+}
+
+.scene-section {
+    position: relative;
+    width: 100%;
+    min-height: 120vh;
+}
+
+#section-mask {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    --mask-center: 20%;
+    --slide-opacity: 1;
+    --ellipse-mask: 0;
+    --blackout: 0;
+    background:
+        linear-gradient(to right,
+            rgba(0, 0, 0, 0) calc(var(--mask-center) - 45%),
+            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.98)) calc(var(--mask-center) - 20%),
+            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.96)) calc(var(--mask-center) + 20%),
+            rgba(0, 0, 0, 0) calc(var(--mask-center) + 45%)),
+        radial-gradient(ellipse 90% 48% at 50% 50%,
+            rgba(0, 0, 0, 0) 36%,
+            rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.45)) 58%,
+            rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.82)) 82%,
+            rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.97)) 100%),
+        linear-gradient(to bottom,
+            rgba(0, 0, 0, var(--blackout)) 0%,
+            rgba(0, 0, 0, var(--blackout)) 100%);
+    will-change: background;
+}
+
+.workflow-link {
+    fill: none;
+    stroke: #facc15;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.55));
+}
+
+.workflow-dot {
+    fill: #facc15;
+    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
+}

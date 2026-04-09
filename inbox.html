@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercharged - Circular Inbox (v5)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                        mono: ['Geist Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: white;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .disk-container {
+            position: relative;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            /* Enable some 3D goodness */
+        }
+
+        /* The background circle/disk (600px diameter) */
+        .disk-bg {
+            position: absolute;
+            inset: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 80px rgba(0, 0, 0, 1), inset 0 0 40px rgba(0, 0, 0, 0.8);
+            transform: translateZ(-20px);
+        }
+
+        /* Unified Floating 3D Cards */
+        .inbox-card {
+            position: absolute;
+            width: 170px;
+            padding: 1rem;
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow:
+                0 10px 30px -10px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(0, 0, 0, 0.4);
+            transform: translate(-50%, -50%);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50;
+        }
+
+        .inbox-card:hover {
+            transform: translate(-50%, -60%) scale(1.05) rotateX(10deg);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 1);
+            z-index: 100;
+        }
+
+        .avatar-wrap img {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: #000;
+            padding: 2px;
+            object-fit: cover;
+        }
+
+        /* The AI Button in the center */
+        .ai-center-hub {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #111, #000);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .ai-center-hub .sparkle {
+            font-size: 1.6rem;
+            color: #f97316;
+            text-shadow: 0 0 15px rgba(249, 115, 22, 0.6);
+        }
+
+        /* Sections Arcs */
+        .section-arc {
+            position: absolute;
+            inset: 95px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            pointer-events: none;
+            opacity: 0.15;
+            z-index: 5;
+        }
+
+        .arc-investments {
+            border-top-color: #3b82f6;
+            border-right-color: #3b82f6;
+            clip-path: polygon(50% 50%, 50% 0, 100% 0, 100% 70.7%, 50% 50%);
+        }
+
+        .arc-founders {
+            border-bottom-color: #10b981;
+            clip-path: polygon(50% 50%, 100% 70.7%, 100% 100%, 0 100%, 0 70.7%, 50% 50%);
+        }
+
+        .arc-research {
+            border-left-color: #a855f7;
+            border-top-color: #a855f7;
+            clip-path: polygon(50% 50%, 0 70.7%, 0 0, 50% 0, 50% 50%);
+        }
+
+        .group-label {
+            position: absolute;
+            font-family: 'Geist Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.3;
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        .rec-badge {
+            background: #f97316;
+            color: black;
+            font-size: 7px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Per-color highlights for cards */
+        .card-investments {
+            border-top: 2px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .card-founders {
+            border-top: 2px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .card-research {
+            border-top: 2px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .card-recommended {
+            border-top: 2px solid #f97316;
+            width: 200px;
+            background: rgba(25, 20, 15, 0.8);
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <div class="disk-container">
+
+        <!-- Background Disk -->
+        <div class="disk-bg"></div>
+
+        <!-- Section Highlights (Arcs) -->
+        <div class="section-arc arc-investments"></div>
+        <div class="section-arc arc-founders"></div>
+        <div class="section-arc arc-research"></div>
+
+        <!-- Central AI Button -->
+        <div class="ai-center-hub">
+            <div class="sparkle">✦</div>
+        </div>
+
+        <!-- Labels -->
+        <div class="group-label text-blue-400" style="top: 80px; right: 80px;">Investments</div>
+        <div class="group-label text-green-400" style="bottom: 80px; left: 50%; transform: translateX(-50%);">Founders
+        </div>
+        <div class="group-label text-purple-400" style="top: 80px; left: 80px;">Research</div>
+
+        <!-- 
+        Center: 400, 400
+        R = 270 (Card center radius)
+        -->
+
+        <!-- Node 1: RECOMMENDED (0°, 12:00) -->
+        <div class="inbox-card card-recommended shadow-[0_20px_40px_rgba(249,115,22,0.15)]"
+            style="top: 130px; left: 400px;">
+            <div class="rec-badge">Recommended Engagement</div>
+            <img src="https://i.pravatar.cc/200?img=11" alt="Avatar"
+                class="w-16 h-16 rounded-full border-2 border-orange-500/50 mb-3 p-1 bg-black">
+            <div class="text-xs font-bold text-white mb-1 uppercase tracking-wide">David Chen</div>
+            <div class="text-[10px] text-gray-300 leading-tight">Coffee about AI-native investing? I've simulated 4
+                high-resonance outcomes.</div>
+        </div>
+
+        <!-- Node 2: 45° (1:30) - Investments -->
+        <div class="inbox-card card-investments" style="top: 210px; left: 590px;">
+            <img src="https://i.pravatar.cc/200?img=52" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1">Sarah Miller</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Q3 Projections are ready to ship.</div>
+        </div>
+
+        <!-- Node 3: 90° (3:00) - Investments -->
+        <div class="inbox-card card-investments" style="top: 400px; left: 670px;">
+            <img src="https://i.pravatar.cc/200?img=60" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1">Alex K.</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Sequoia intro confirmed for Friday.</div>
+        </div>
+
+        <!-- Node 4: 135° (4:30) - Founders -->
+        <div class="inbox-card card-founders" style="top: 590px; left: 590px;">
+            <img src="https://i.pravatar.cc/200?img=47" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1 text-center">Elena Rostova</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Book office hours for the hunt?</div>
+        </div>
+
+        <!-- Node 5: 180° (6:00) - Founders -->
+        <div class="inbox-card card-founders" style="top: 670px; left: 400px;">
+            <img src="https://i.pravatar.cc/200?img=33" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1">Marcus Webb</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Fixed the harvester boundaries.</div>
+        </div>
+
+        <!-- Node 6: 225° (7:30) - Research -->
+        <div class="inbox-card card-research" style="top: 590px; left: 210px;">
+            <img src="https://i.pravatar.cc/200?img=65" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1 text-center">John C.</div>
+            <div class="text-[9px] text-gray-400 leading-tight">New paper on LLM safety metrics.</div>
+        </div>
+
+        <!-- Node 7: 270° (9:00) - Research -->
+        <div class="inbox-card card-research" style="top: 400px; left: 130px;">
+            <img src="https://i.pravatar.cc/200?img=22" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1">James M.</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Topo VFX Shaders are online.</div>
+        </div>
+
+        <!-- Node 8: 315° (10:30) - Research -->
+        <div class="inbox-card card-research" style="top: 210px; left: 210px;">
+            <img src="https://i.pravatar.cc/200?img=36" alt="Avatar" class="w-12 h-12 rounded-full mb-3">
+            <div class="text-[11px] font-bold text-white mb-1">Sophia L.</div>
+            <div class="text-[9px] text-gray-400 leading-tight">Updated the Signal bridge logic.</div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

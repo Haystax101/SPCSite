@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supercharged Console</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- Left Sidebar: Prioritised Inbox -->
+        <aside class="sidebar left-sidebar">
+            <header class="sidebar-header">
+                <div class="logo">SUPERCHARGED</div>
+            </header>
+
+            <div class="inbox-section">
+                <h3 class="section-title">Prioritised Inbox</h3>
+
+                <div class="inbox-list">
+                    <!-- Inbox Item 1 -->
+                    <div class="inbox-item priority-high">
+                        <div class="avatar"><img src="https://i.pravatar.cc/100?img=11" alt="Alex"></div>
+                        <div class="item-content">
+                            <div class="item-head">
+                                <h4>Alex Mercer</h4>
+                                <span class="time">2m ago</span>
+                            </div>
+                            <p class="preview">Building out a new fintech platform, would love your thoughts on the seed
+                                round...</p>
+                            <div class="ai-insight">AI: High synergy with your target of 'Startups raising Seed'</div>
+                        </div>
+                        <div class="unread-dot"></div>
+                    </div>
+
+                    <!-- Inbox Item 2 -->
+                    <div class="inbox-item priority-med">
+                        <div class="avatar"><img src="https://i.pravatar.cc/100?img=47" alt="Sarah"></div>
+                        <div class="item-content">
+                            <div class="item-head">
+                                <h4>Sarah Jenkins</h4>
+                                <span class="time">1h ago</span>
+                            </div>
+                            <p class="preview">Thanks for connecting! I saw your profile and it matches our B2B focus.
+                            </p>
+                            <div class="ai-insight">AI: Strong match, follow up recommended.</div>
+                        </div>
+                    </div>
+
+                    <!-- Inbox Item 3 -->
+                    <div class="inbox-item priority-low">
+                        <div class="avatar"><img src="https://i.pravatar.cc/100?img=33" alt="David"></div>
+                        <div class="item-content">
+                            <div class="item-head">
+                                <h4>David Chen</h4>
+                                <span class="time">Yesterday</span>
+                            </div>
+                            <p class="preview">Are you attending the LSE tech mixer tomorrow evening?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-widget">
+                <div class="status-indicator">
+                    <span class="pulse"></span>
+                    <div>
+                        <div class="status-text">Network Engine Active</div>
+                        <div class="status-sub">2,402 simulations running</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Neural Network Graph -->
+        <main class="center-view">
+            <div id="graph-container">
+                <canvas id="network-canvas"></canvas>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: AI Assistant -->
+        <aside class="sidebar right-sidebar">
+            <div class="ai-chat-header">
+                <div class="ai-avatar"></div>
+                <span>Supercharged AI</span>
+            </div>
+
+            <div class="ai-chat-messages">
+                <div class="message ai">
+                    I'm running simulations across the London Tech cohort right now. Found a high-resonance cluster in
+                    Fintech. Should I explore further?
+                </div>
+                <div class="message user">
+                    Yes, specifically look for anyone building B2B payment tools.
+                </div>
+                <div class="message ai">
+                    <div class="system-action">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Adjusting simulation parameters...
+                    </div>
+                    Targeting B2B payments infrastructure. I am deploying 500 new conversational simulations. Will
+                    surface top matches in the main cluster soon.
+                </div>
+            </div>
+
+            <div class="ai-chat-input">
+                <input type="text" placeholder="Command your profile...">
+                <button class="send-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                    </svg>
+                </button>
+            </div>
+        </aside>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

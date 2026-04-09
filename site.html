@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The autonomous connection platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .rainbow-text {
+            background-image: linear-gradient(90deg, #4da4b4, #5770c5, #7d49c6, #5770c5, #4da4b4);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: rainbowScroll 4s ease-in-out infinite;
+        }
+
+        @keyframes rainbowScroll {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        @keyframes wordScroll {
+
+            0%,
+            12% {
+                transform: translateY(0);
+            }
+
+            16%,
+            28% {
+                transform: translateY(-14.28%);
+            }
+
+            33%,
+            45% {
+                transform: translateY(-28.57%);
+            }
+
+            50%,
+            62% {
+                transform: translateY(-42.85%);
+            }
+
+            66%,
+            78% {
+                transform: translateY(-57.14%);
+            }
+
+            83%,
+            95% {
+                transform: translateY(-71.42%);
+            }
+
+            100% {
+                transform: translateY(-85.71%);
+            }
+        }
+
+        .scrolling-words {
+            animation: wordScroll 10s cubic-bezier(0.8, 0, 0.2, 1) infinite;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 900vh;
+            /* Extended Scroll room further for new profile section */
+            background-color: #000;
+            /* Pure black to match the canvas terrain exactly */
+            color: #fff;
+            overflow-x: hidden;
+            overscroll-behavior: none; /* Stops bounce scroll causing GSAP hiccups */
+        }
+
+        .scene-section {
+            position: relative;
+            width: 100%;
+            min-height: 120vh;
+        }
+
+        #profile-section {
+            min-height: 125vh;
+        }
+
+        #graph-wrapper {
+            will-change: width, height, top, left, transform;
+            overflow: hidden;
+        }
+
+        #graph-container {
+            will-change: transform;
+        }
+
+        #section-mask {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            --left-mask: 0;
+            --right-mask: 0;
+            --ellipse-mask: 0;
+            --blackout: 0;
+            background:
+                linear-gradient(to right,
+                    rgba(0, 0, 0, calc(var(--left-mask) * 0.98)) 0%,
+                    rgba(0, 0, 0, calc(var(--left-mask) * 0.96)) 44%,
+                    rgba(0, 0, 0, calc(var(--left-mask) * 0.45)) 56%,
+                    rgba(0, 0, 0, 0) 70%),
+                linear-gradient(to left,
+                    rgba(0, 0, 0, calc(var(--right-mask) * 0.98)) 0%,
+                    rgba(0, 0, 0, calc(var(--right-mask) * 0.96)) 44%,
+                    rgba(0, 0, 0, calc(var(--right-mask) * 0.45)) 56%,
+                    rgba(0, 0, 0, 0) 70%),
+                radial-gradient(ellipse 90% 48% at 50% 50%,
+                    rgba(0, 0, 0, 0) 36%,
+                    rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.45)) 58%,
+                    rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.82)) 82%,
+                    rgba(0, 0, 0, calc(var(--ellipse-mask) * 0.97)) 100%),
+                linear-gradient(to bottom,
+                    rgba(0, 0, 0, var(--blackout)) 0%,
+                    rgba(0, 0, 0, var(--blackout)) 100%);
+            will-change: background;
+        }
+
+        #workflow-section {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 12;
+            pointer-events: none;
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
+        #workflow-lines {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .workflow-link {
+            fill: none;
+            stroke: #facc15;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.55));
+        }
+
+        .workflow-dot {
+            fill: #facc15;
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.85));
+        }
+
+        .workflow-card {
+            position: absolute;
+            top: 50%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            transform: translateY(-50%);
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+            will-change: transform, opacity;
+        }
+
+        .workflow-card img {
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            object-fit: cover;
+        }
+
+        .workflow-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            line-height: 1.2;
+        }
+
+        .workflow-name {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .workflow-role {
+            color: #9ca3af;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .workflow-card-left {
+            left: 7%;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .workflow-card-right {
+            right: 6%;
+            transform: translateY(-50%);
+            opacity: 0;
+        }
+
+        #workflow-david-match {
+            margin-left: 8px;
+            color: #4ade80;
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.25);
+            padding: 4px 6px;
+            border-radius: 7px;
+            white-space: nowrap;
+        }
+
+        #workflow-david-dot {
+            position: absolute;
+            top: 50%;
+            right: -26px;
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            transform: translateY(-50%);
+            background: #facc15;
+            box-shadow: 0 0 14px rgba(250, 204, 21, 0.85);
+            will-change: right;
+        }
+
+        #workflow-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: min(24vw, 320px);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        #workflow-center img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 900px) {
+            #workflow-center {
+                width: min(44vw, 280px);
+            }
+
+            .workflow-card {
+                min-width: 146px;
+                padding: 8px 10px;
+            }
+
+            .workflow-name {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Glassmorphic Navbar -->
+    <nav
+        class="fixed top-6 left-1/2 -translate-x-1/2 w-[70vw] max-w-5xl z-50 flex items-center justify-between px-8 py-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-[40px] shadow-2xl">
+        <div class="text-white font-bold text-xl tracking-tight">Supercharged</div>
+        <button
+            class="bg-white text-black font-semibold px-6 py-2.5 rounded-full text-[15px] hover:bg-gray-200 transition-colors pointer-events-auto">
+            Join waitlist
+        </button>
+    </nav>
+
+    <!-- Hero Content -->
+    <div id="hero-text" class="fixed top-1/2 -translate-y-1/2 left-[5%] w-[45%] z-10 ">
+
+        <div class="text-[10px] tracking-[0.15em] font-bold text-gray-400 uppercase mb-6 flex items-center gap-2">
+            <span>NOW IN BETA</span>
+            <span class="text-gray-600">·</span>
+            <span>AI-NATIVE SOCIAL</span>
+        </div>
+
+        <h1
+            class="text-[4.5rem] font-bold leading-[1.05] tracking-[-0.03em] text-white drop-shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-8">
+            Connect autonomously with
+            <div class="h-[1.1em] overflow-hidden inline-block align-bottom -mb-2">
+                <div
+                    class="scrolling-words flex flex-col text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-purple-500 pb-2">
+                    <span class="h-[1.1em] shrink-0 block">Employers</span>
+                    <span class="h-[1.1em] shrink-0 block">Mentors</span>
+                    <span class="h-[1.1em] shrink-0 block">Investors</span>
+                    <span class="h-[1.1em] shrink-0 block">Professionals</span>
+                    <span class="h-[1.1em] shrink-0 block">Co-Founders</span>
+                    <span class="h-[1.1em] shrink-0 block">Collaborators</span>
+                    <span class="h-[1.1em] shrink-0 block">Employers</span>
+                </div>
+            </div>
+        </h1>
+
+        <p class="text-lg text-gray-400 leading-relaxed font-normal mb-10 max-w-[90%]">
+            Surface the most valuable hidden connections at a scale no human ever could.
+        </p>
+
+        <div class="flex items-center gap-4 mb-10">
+            <button
+                class="bg-white text-black font-semibold px-6 py-3.5 rounded-full text-[15px] hover:bg-gray-200 transition-colors">
+                Join waitlist
+            </button>
+            <button
+                class="bg-[#111] text-white border border-white/10 font-semibold px-6 py-3.5 rounded-full text-[15px] hover:bg-[#222] transition-colors">
+                See how it works &darr;
+            </button>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div class="flex -space-x-2">
+                <div class="w-7 h-7 rounded-full border-2 border-black bg-gradient-to-br from-purple-500 to-pink-500">
+                </div>
+                <div class="w-7 h-7 rounded-full border-2 border-black bg-gradient-to-br from-pink-500 to-orange-500">
+                </div>
+                <div class="w-7 h-7 rounded-full border-2 border-black bg-gradient-to-br from-teal-400 to-blue-500">
+                </div>
+                <div class="w-7 h-7 rounded-full border-2 border-black bg-gradient-to-br from-blue-500 to-indigo-500">
+                </div>
+                <div class="w-7 h-7 rounded-full border-2 border-black bg-gradient-to-br from-green-400 to-yellow-500">
+                </div>
+            </div>
+            <div class="text-[14px] text-gray-400 font-medium">
+                <span class="rainbow-text font-bold italic inline-block pr-1 mr-0.5">268</span> people already
+                supercharged
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Problem Section Text -->
+    <div id="problem-text"
+        class="fixed top-1/2 -translate-y-1/2 right-[5%] w-[45%] z-10 pointer-events-none  flex flex-col justify-center items-start"
+        style="opacity: 0;">
+        <h2
+            class="text-[3.5rem] font-bold text-white tracking-tight leading-[1.1] drop-shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-6">
+            Every life-changing connection is already out there.
+        </h2>
+        <p
+            class="text-[1.15rem] leading-relaxed text-gray-400 font-normal drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] mb-10">
+            The investors who would back you, the co-founders who think like you, the mentors with your exact answers —
+            they exist right now. You just can't find them, reach them, or keep them.
+        </p>
+        <div class="pointer-events-auto">
+            <button onclick="window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })"
+                class="bg-[#111] text-white border border-white/10 font-semibold px-6 py-3.5 rounded-full text-[15px] hover:bg-[#222] transition-colors shadow-xl focus:outline-none">
+                Our solution &darr;
+            </button>
+        </div>
+    </div>
+
+    <!-- Visualise Section Title -->
+    <div id="visualise-title"
+        class="fixed top-[15%] left-1/2 -translate-x-1/2 z-10 pointer-events-none "
+        style="opacity: 0;">
+        <h2 class="text-4xl font-bold text-white tracking-tight uppercase">VISUALISE YOUR PROGRESS</h2>
+    </div>
+
+    <!-- Visualise Section Bottom Text -->
+    <div id="visualise-text"
+        class="fixed bottom-[10%] left-1/2 -translate-x-1/2 z-10 pointer-events-none  w-full text-center"
+        style="opacity: 0;">
+        <p class="text-lg text-gray-400 max-w-2xl mx-auto">Your social graph evolves in real-time as our social
+            simulations reshape your topography</p>
+    </div>
+
+    <!-- Profile Section Text -->
+    <section id="profile-section" class="scene-section" aria-label="It all starts with you">
+        <div id="profile-text"
+            class="fixed top-1/2 -translate-y-1/2 left-[5%] w-[45%] z-10 pointer-events-none flex flex-col justify-center items-start"
+            style="opacity: 0;">
+            <h2
+                class="text-[3.5rem] font-bold text-white tracking-tight leading-[1.1] drop-shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-6">
+                It all starts with you.
+            </h2>
+            <p class="text-[1.15rem] leading-relaxed text-gray-400 font-normal drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">
+                Your background, goals, personality, values, and ambitions distilled into a living virtual simulation
+                &mdash; evolving with every interaction. Not a form. A multidimensional vector, computed simultaneously
+                against every other profile on the plane.
+            </p>
+        </div>
+    </section>
+
+    <!-- Animated Topography Box -->
+    <div id="graph-wrapper" class="fixed z-0 overflow-hidden"
+        style="width: 100vw; height: 100vh; left: 0; top: 0; pointer-events: none;">
+
+        <div id="graph-container"
+            style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: auto;">
+            <canvas id="network-canvas" style="display: block; width: 100%; height: 100%;"></canvas>
+            <div id="section-mask"></div>
+
+            <!-- Person UI Floating Nodes Container (from blocks.html) -->
+            <div id="nodes-container"
+                style="opacity: 0;  position: absolute; inset: 0; z-index: 5; pointer-events: none;">
+
+                <!-- Person UI Floating Overlay 1 (High Peak) -->
+                ...
+                <!-- Kept the same nodes layout, just nesting inside graph-wrapper -->
+                <div id="node-david"
+                    class="absolute top-[46%] left-[35%] flex flex-col items-center group/node cursor-pointer hover:scale-105  pointer-events-auto">
+                    <div
+                        class="absolute bottom-full mb-[0.5rem] translate-x-[4.5rem] opacity-100 z-10 w-max pointer-events-none">
+                        <div
+                            class="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-2.5 shadow-2xl flex items-center gap-3 relative">
+                            <img src="https://i.pravatar.cc/100?img=11" alt="Avatar"
+                                class="w-8 h-8 rounded-full border border-gray-600">
+                            <div class="pr-1">
+                                <div class="text-white text-xs font-semibold">David Chen</div>
+                                <div class="text-gray-400 text-[9px] mt-0.5">Building FinTech at Genesis</div>
+                            </div>
+                            <div class="ml-2 bg-green-500/20 text-green-400 text-[9px] font-bold px-2 py-1 rounded-md">
+                                98% Match</div>
+                        </div>
+                    </div>
+                    <div
+                        class="w-px h-24 bg-gradient-to-b from-white/40 to-transparent absolute bottom-[50%] origin-bottom rotate-[54deg]">
+                    </div>
+                    <div
+                        class="w-3 h-3 bg-yellow-400 rounded-full shadow-[0_0_15px_rgba(250,204,21,0.8)] relative mt-3 z-10">
+                        <div class="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-50 block"></div>
+                    </div>
+                </div>
+
+                <!-- Person UI Floating Overlay 2 (Mid tier) -->
+                <div id="node-elena"
+                    class="absolute top-[35%] left-[55%] flex flex-col items-center group/node cursor-pointer hover:scale-105  pointer-events-auto ">
+                    <div class="absolute bottom-full mb-1.5 opacity-100 -translate-y-1 z-10 w-max pointer-events-none">
+                        <div
+                            class="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-2.5 shadow-2xl flex items-center gap-3 relative">
+                            <img src="https://i.pravatar.cc/100?img=47" alt="Avatar"
+                                class="w-8 h-8 rounded-full border border-gray-600">
+                            <div class="pr-1">
+                                <div class="text-white text-xs font-semibold">Elena Rostova</div>
+                                <div class="text-gray-400 text-[9px] mt-0.5">Angel Investor</div>
+                            </div>
+                            <div
+                                class="ml-2 bg-orange-500/20 text-orange-400 text-[9px] font-bold px-2 py-1 rounded-md">
+                                72% Match</div>
+                        </div>
+                    </div>
+                    <div class="w-px h-4 bg-gradient-to-b from-white/30 to-transparent absolute bottom-1/2"></div>
+                    <div
+                        class="w-2.5 h-2.5 bg-yellow-300 rounded-full shadow-[0_0_12px_rgba(250,204,21,0.6)] relative mt-2 z-10">
+                        <div class="absolute inset-0 bg-yellow-300 rounded-full animate-ping opacity-40 block"
+                            style="animation-duration: 1.5s;"></div>
+                    </div>
+                </div>
+
+                <!-- Person UI Floating Overlay 3 (Outskirts) -->
+                <div id="node-marcus"
+                    class="absolute bottom-[28%] left-[25%] flex flex-col items-center group/node cursor-pointer hover:scale-105  pointer-events-auto ">
+                    <div class="absolute bottom-full mb-1.5 opacity-100 -translate-y-1 z-10 w-max pointer-events-none">
+                        <div
+                            class="bg-black/70 backdrop-blur-md border border-white/10 rounded-xl p-2.5 shadow-2xl flex items-center gap-3 relative">
+                            <img src="https://i.pravatar.cc/100?img=33" alt="Avatar"
+                                class="w-8 h-8 rounded-full border border-gray-600">
+                            <div class="pr-1">
+                                <div class="text-white text-xs font-semibold">Marcus Webb</div>
+                                <div class="text-gray-400 text-[9px] mt-0.5">SaaS Growth Researcher</div>
+                            </div>
+                            <div class="ml-2 bg-red-500/20 text-red-400 text-[9px] font-bold px-2 py-1 rounded-md">24%
+                                Match</div>
+                        </div>
+                    </div>
+                    <div class="w-px h-3 bg-gradient-to-b from-white/20 to-transparent absolute bottom-1/2"></div>
+                    <div
+                        class="w-2 h-2 bg-gray-200 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)] relative mt-1.5 z-10">
+                        <div class="absolute inset-0 bg-gray-200 rounded-full animate-ping opacity-30 block"
+                            style="animation-duration: 2s;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="workflow-section" aria-hidden="true">
+            <svg id="workflow-lines" viewBox="0 0 1000 420" preserveAspectRatio="none">
+                <path id="workflow-left-line-top" class="workflow-link" d="M 220 140 C 290 140 330 130 440 140" />
+                <path id="workflow-left-line-middle" class="workflow-link" d="M 220 210 C 300 210 340 210 440 210" />
+                <path id="workflow-left-line-bottom" class="workflow-link" d="M 220 280 C 290 290 330 280 440 280" />
+
+                <path id="workflow-right-line-top" class="workflow-link" d="M 560 140 C 670 130 710 140 780 140" />
+                <path id="workflow-right-line-middle" class="workflow-link" d="M 560 210 C 700 210 740 210 780 210" />
+                <path id="workflow-right-line-bottom" class="workflow-link" d="M 560 280 C 670 280 710 290 780 280" />
+
+                <circle id="workflow-dot-left-top" class="workflow-dot" cx="440" cy="140" r="4.5" />
+                <circle id="workflow-dot-left-middle" class="workflow-dot" cx="440" cy="210" r="4.5" />
+                <circle id="workflow-dot-left-bottom" class="workflow-dot" cx="440" cy="280" r="4.5" />
+                <circle id="workflow-dot-right-top" class="workflow-dot" cx="560" cy="140" r="4.5" />
+                <circle id="workflow-dot-right-middle" class="workflow-dot" cx="560" cy="210" r="4.5" />
+                <circle id="workflow-dot-right-bottom" class="workflow-dot" cx="560" cy="280" r="4.5" />
+            </svg>
+
+            <div id="workflow-david-card" class="workflow-card workflow-card-left">
+                <img src="https://i.pravatar.cc/100?img=11" alt="David Chen">
+                <div class="workflow-meta">
+                    <div class="workflow-name">David Chen</div>
+                    <div class="workflow-role">Building FinTech at Genesis</div>
+                </div>
+                <div id="workflow-david-match">98% Match</div>
+                <div id="workflow-david-dot"></div>
+            </div>
+
+            <div id="workflow-center">
+                <img src="stats.png" alt="Connection statistics">
+            </div>
+
+            <div id="workflow-elena-card" class="workflow-card workflow-card-right">
+                <img src="https://i.pravatar.cc/100?img=47" alt="Elena Rostova">
+                <div class="workflow-meta">
+                    <div class="workflow-name">Elena Rostova</div>
+                    <div class="workflow-role">Angel Investor</div>
+                </div>
+            </div>
+    </div>
+
+    <!-- GSAP / ScrollTrigger / WebGL Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -7,7 +7,7 @@ export default function ProblemSection() {
         Every life-changing connection is already out there.
       </h2>
       <p className="text-[1.15rem] max-[640px]:text-[0.96rem] leading-relaxed max-[640px]:leading-snug text-gray-400 font-normal drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] mb-10 max-[640px]:mb-5">
-        The investors who would back you, the co-founders who think like you, the mentors with your exact answers —
+        The investors who would back you, the co-founders who think like you, the mentors with your exact answers -
         they exist right now. You just can't find them, reach them, or keep them.
       </p>
       <div className="pointer-events-auto">

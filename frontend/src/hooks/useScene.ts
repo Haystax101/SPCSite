@@ -31,13 +31,13 @@ export default function useScene() {
 
     const sceneState = {
       cameraX: 0,
-      cameraY: 720,
-      cameraZ: 1430,
+      cameraY: 840,
+      cameraZ: 1950,
       rotationX: -0.86,
       rotationY: 0,
       rotationZ: -0.18,
-      planeRotationZ: -0.42,
-      planeScale: 1,
+      planeRotationZ: 0.1036,
+      planeScale: 0.72,
       heightScale: 400,
       panX: 0,
       panY: 0
@@ -45,14 +45,14 @@ export default function useScene() {
 
     const profileSwoop = {
       startX: 0,
-      startY: 720,
-      startZ: 1430,
+      startY: 840,
+      startZ: 1950,
       endX: -300,
-      endY: 560,
-      endZ: 1080
+      endY: 680,
+      endZ: 1500
     };
 
-    const profileMotionStart = 0.99;
+    const profileMotionStart = 0.86;
 
     const vertexShader = `
     uniform float iTime;
@@ -227,9 +227,11 @@ export default function useScene() {
 
       const inboxSection = document.getElementById('inbox-section');
       if (inboxSection) {
-        const inboxIn = smoothstep(1.48, 1.50, p);
+        const inboxIn = smoothstep(1.42, 1.46, p);
+        const footerReveal = smoothstep(1.46, 1.50, p);
+        const footerLiftPx = window.innerHeight * 0.5 * footerReveal;
         inboxSection.style.opacity = Math.max(0, Math.min(1, inboxIn)).toFixed(4);
-        inboxSection.style.transform = `translateY(${(1 - inboxIn) * 30}px)`;
+        inboxSection.style.transform = `translateY(${((1 - inboxIn) * 30) - footerLiftPx}px)`;
       }
     }
 
@@ -249,8 +251,9 @@ export default function useScene() {
       const slideProgress = smoothstep(0.15, 0.30, p);
       const leftMaskCenter = 20 - 45 * slideProgress;
       const rightMaskCenter = 120 - 45 * slideProgress;
-      // Fade out slide mask for Visualize
-      const slideOpacity = (1.0 - smoothstep(0.40, 0.50, p)) * (1.0 - smoothstep(0.85, 1.0, p));
+      // Keep hero fully visible on the right and problem fully visible on the left.
+      const leftSlideOpacity = 1.0 - smoothstep(0.20, 0.30, p);
+      const rightSlideOpacity = smoothstep(0.22, 0.30, p) * (1.0 - smoothstep(0.40, 0.50, p));
 
       const visualiseIn = smoothstep(0.45, 0.55, p) * (1.0 - smoothstep(0.85, 0.92, p));
 
@@ -260,7 +263,8 @@ export default function useScene() {
 
       sectionMask.style.setProperty('--left-mask-center', `${leftMaskCenter.toFixed(2)}%`);
       sectionMask.style.setProperty('--right-mask-center', `${rightMaskCenter.toFixed(2)}%`);
-      sectionMask.style.setProperty('--slide-opacity', Math.max(0, slideOpacity).toFixed(4));
+      sectionMask.style.setProperty('--left-slide-opacity', Math.max(0, leftSlideOpacity).toFixed(4));
+      sectionMask.style.setProperty('--right-slide-opacity', Math.max(0, rightSlideOpacity).toFixed(4));
       sectionMask.style.setProperty('--ellipse-mask', ellipseMask.toFixed(4));
       sectionMask.style.setProperty('--blackout', blackout.toFixed(4));
     }
@@ -274,7 +278,7 @@ export default function useScene() {
       if (nodeMarcus) nodeMarcus.style.opacity = ((1 - hideOthers) * (1 - workflowTakeover)).toFixed(4);
 
       if (nodeDavid) {
-        const reveal = smoothstep(profileMotionStart, 1.18, scrollProgress);
+        const labelGrow = smoothstep(1.14, 1.28, scrollProgress);
 
         // Keep David and camera motion coupled with a single diagonal progress curve.
         const xMotion = clamp01((sceneState.cameraX - profileSwoop.startX) / (profileSwoop.endX - profileSwoop.startX));
@@ -286,7 +290,7 @@ export default function useScene() {
 
         nodeDavid.style.transform = `translate(-50%, -50%) scale(1)`;
         nodeDavid.style.opacity = (1 - workflowTakeover).toFixed(4);
-        nodeDavid.setAttribute('data-large', reveal > 0 ? 'true' : 'false');
+        nodeDavid.setAttribute('data-large', labelGrow > 0.03 ? 'true' : 'false');
       }
     }
 

@@ -6,6 +6,8 @@ import HeroSection from './components/HeroSection';
 import ProblemSection from './components/ProblemSection';
 import VisualiseSection from './components/VisualiseSection';
 import ProfileSection from './components/ProfileSection';
+import AboutPage from './components/AboutPage';
+import ManifestoPage from './components/ManifestoPage';
 import './index.css';
 
 const GraphWrapper = lazy(() => import('./components/GraphWrapper'));
@@ -44,6 +46,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/manifesto" element={<ManifestoPage />} />
       <Route path="/waitlist" element={<WaitlistPage />} />
       <Route path="*" element={<LandingPage />} />
     </Routes>

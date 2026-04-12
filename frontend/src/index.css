@@ -88,19 +88,20 @@
     z-index: 2;
     --left-mask-center: 20%;
     --right-mask-center: 120%;
-    --slide-opacity: 1;
+  --left-slide-opacity: 1;
+  --right-slide-opacity: 0;
     --ellipse-mask: 0;
     --blackout: 0;
     background:
         linear-gradient(to right,
             rgba(0, 0, 0, 0) calc(var(--left-mask-center) - 45%),
-            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.98)) calc(var(--left-mask-center) - 20%),
-            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.96)) calc(var(--left-mask-center) + 20%),
+      rgba(0, 0, 0, calc(var(--left-slide-opacity) * 0.98)) calc(var(--left-mask-center) - 20%),
+      rgba(0, 0, 0, calc(var(--left-slide-opacity) * 0.96)) calc(var(--left-mask-center) + 20%),
             rgba(0, 0, 0, 0) calc(var(--left-mask-center) + 45%)),
         linear-gradient(to right,
             rgba(0, 0, 0, 0) calc(var(--right-mask-center) - 45%),
-            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.98)) calc(var(--right-mask-center) - 20%),
-            rgba(0, 0, 0, calc(var(--slide-opacity) * 0.96)) calc(var(--right-mask-center) + 20%),
+      rgba(0, 0, 0, calc(var(--right-slide-opacity) * 0.98)) calc(var(--right-mask-center) - 20%),
+      rgba(0, 0, 0, calc(var(--right-slide-opacity) * 0.96)) calc(var(--right-mask-center) + 20%),
             rgba(0, 0, 0, 0) calc(var(--right-mask-center) + 45%)),
         radial-gradient(ellipse 90% 48% at 50% 50%,
             rgba(0, 0, 0, 0) 36%,
